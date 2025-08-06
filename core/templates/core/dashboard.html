@@ -1,10 +1,24 @@
 <!DOCTYPE html>
+
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h1>Welcome to Sapna's Dream Saloon</h1>
+        <p>This is your destiny for make over!</p>
+        <a class="btn btn-primary" href="{% url 'login' %}">Login</a>
+    </div>
+{% endblock %}
+
 <html>
 <head>
     <title>Dashboard</title>
 </head>
 <body>
     <h2>Welcome, {{ request.user.username }}</h2>
+
 
     <ul>
         <li><a href="{% url 'form1' %}">Form 1</a></li>

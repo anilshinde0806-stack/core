@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>All Bookings</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Service</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Email</th>
+        <th>Phone</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for booking in bookings %}
+      <tr>
+        <td>{{ booking.name }}</td>
+        <td>{{ booking.service }}</td>
+        <td>{{ booking.appointment_date }}</td>
+        <td>{{ booking.appointment_time }}</td>
+        <td>{{ booking.email }}</td>
+        <td>{{ booking.phone }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
