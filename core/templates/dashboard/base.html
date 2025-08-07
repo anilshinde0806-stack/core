@@ -1,0 +1,33 @@
+<!-- templates/dashboard/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Dashboard Salon Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+  <div class="sidebar">
+    <h2>ߒ‍♀️ Salon</h2>
+    <ul>
+      <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+      <li><a href="{% url 'form1' %}">Bookings</a></li>
+      <li><a href="#">Customers</a></li>
+      <li><a href="#">Reports</a></li>
+      <li><a href="{% url 'logout' %}">Logout</a></li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>{% block header %}Dashboard{% endblock %}</h1>
+    </div>
+    <div class="content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,287 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapna's Salon - Home</title>
+
+    <!-- Add inside <head> -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- In <head> -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            color: #333;
+        }
+        header {
+            background: #e91e63;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+        .hero {
+            background: url("{% static 'images/salon-banner.png' %}") no-repeat center center/cover;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .hero h2 {
+            font-size: 3rem;
+            margin: 0;
+        }
+        .services {
+            padding: 50px 20px;
+            text-align: center;
+        }
+        .services h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+        .service {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .service i {
+            font-size: 2rem;
+            color: #e91e63;
+            margin-bottom: 10px;
+        }
+        .cta {
+            background: #e91e63;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .cta a {
+            display: inline-block;
+            background: white;
+            color: #e91e63;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #booking-section {
+  text-align: center;
+  margin-top: 20px;
+}
+#loadBookingForm {
+  padding: 10px 20px;
+  background-color: #d63384;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#loadBookingForm:hover {
+  background-color: #c82373;
+}
+#formContainer {
+  margin-top: 20px;
+}
+
+    </style>
+
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <header>
+
+        <img src="{% static 'images/salon-logo.png' %}" class="salon-logo" alt="Salon Logo">
+        <h1><i class="fa-solid fa-scissors"></i> Sapna's Dream Salon</h1>
+        <nav>
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>Style That Defines You</h2>
+    </section>
+
+    <section class="services">
+        <h3>Our Services</h3>
+        <div class="service-grid">
+            <div class="service">
+                <i class="fa-solid fa-person"></i>
+                <h4>Haircuts</h4>
+                <p>Trendy styles for men & women</p>
+            </div>
+            <div class="service">
+                <i class="fa-solid fa-spa"></i>
+                <h4>Spa & Relaxation</h4>
+                <p>Facials, massages, and more</p>
+            </div>
+            <div class="service">
+                <i class="fa-solid fa-bahai"></i>
+                <h4>Hair Coloring</h4>
+                <p>Vibrant, bold or natural tones</p>
+            </div>
+            <div class="service">
+                <i class="fa-solid fa-hand-sparkles"></i>
+                <h4>Manicure & Pedicure</h4>
+                <p>Clean, care & polish your nails</p>
+            </div>
+        </div>
+    </section>
+{% if user.is_authenticated and not user.is_staff %}
+  <!-- Booking form for normal logged-in users -->
+  <section id="mini-booking">
+    <h3>Quick Booking</h3>
+    <form id="booking-form" method="post" action="{% url 'ajax_booking' %}">
+      {% csrf_token %}
+      <input type="text" name="service" placeholder="Service" required>
+      <input type="date" name="date" required>
+      <input type="time" name="time" required>
+      <button type="submit">Book</button>
+    </form>
+    <div id="booking-response"></div>
+  </section>
+{% else %}
+  {% if not user.is_authenticated %}
+    <p><a href="{% url 'login' %}">Log in</a> to book an appointment.</p>
+  {% endif %}
+{% endif %}
+<script>
+$(document).ready(function () {
+    // Load form into modal
+    $('#loadBookingForm').click(function () {
+        $.ajax({
+            url: '/ajax/booking/form/',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                $('#modalFormContainer').html(data.form_html);
+
+                const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+                bookingModal.show();
+
+                // ߑ Attach AJAX submit handler **after content is injected**
+                $('#bookingForm').on('submit', function (e) {
+                    e.preventDefault(); // prevent normal form submit
+
+                    $.ajax({
+                        url: $(this).attr('action'),
+                        type: 'POST',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            // Handle success response
+                            $('#modalFormContainer').html('<div class="alert alert-success">Booking confirmed!</div>')
+                             $('#bookingModal').modal({
+                              backdrop: 'static',   // disables closing on outside click
+                              keyboard: false       // disables closing on Esc key
+                               });
+
+                            // Optionally auto-close modal after delay
+                            setTimeout(() => {
+                                bookingModal.hide();
+                            }, 2000);
+                        },
+                        error: function (xhr, status, error) {
+                            $('#modalFormContainer').prepend('<div class="alert alert-danger">Booking failed. Please try again.</div>');
+                            console.log(xhr.responseText);
+                        }
+                    });
+                });
+            }
+        });
+    });
+});
+</script>
+
+<section id="booking-section">
+
+    <!-- Trigger button -->
+<button id="loadBookingForm" class="btn btn-primary">Book Now</button>
+
+<!-- Modal Structure -->
+
+    <div id="bookingModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+
+
+
+    <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bookingModalLabel">Book Appointment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalFormContainer">
+        <!-- AJAX form will be injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+</section>
+<section class="testimonials">
+  <h2>What Our Clients Say</h2>
+  <div class="testimonial-card">
+    <p>ߒ “Amazing service! The best haircut I’ve had in years.”</p>
+    <strong>– Priya K.</strong>
+  </div>
+  <div class="testimonial-card">
+    <p>ߒ “Super clean and friendly staff. Highly recommended!”</p>
+    <strong>– Rahul S.</strong>
+  </div>
+</section>
+<section class="gallery">
+  <h2>Salon Gallery</h2>
+  <div class="gallery-grid">
+    <img src="{% static 'images/gallery1.jpg' %}" alt="Gallery 1">
+    <img src="{% static 'images/gallery2.jpg' %}" alt="Gallery 2">
+    <img src="{% static 'images/gallery3.jpg' %}" alt="Gallery 3">
+  </div>
+</section>
+
+    <footer>
+        &copy; 2025 Unisex Salon. All rights reserved.
+    </footer>
+
+<!-- Before </body> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

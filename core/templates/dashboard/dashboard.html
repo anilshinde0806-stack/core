@@ -1,0 +1,14 @@
+<!-- templates/dashboard/dashboard.html -->
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Salon Dashboard{% endblock %}
+
+{% block header %}Welcome, {{ user.username }}{% endblock %}
+
+{% block content %}
+  <div class="cards">
+    <div class="card">ߒ‍♂️ Total Bookings: 34</div>
+    <div class="card">ߒ Services: 8</div>
+    <div class="card">ߒ Revenue: ₹12,500</div>
+  </div>
+{% endblock %}
