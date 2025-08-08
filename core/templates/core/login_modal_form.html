@@ -1,0 +1,19 @@
+<!-- ߚ DO NOT use {% extends 'base.html' %} -->
+
+<form id="loginForm" method="post">
+  {% csrf_token %}
+  <div class="modal-body">
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" name="username" class="form-control" required>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" name="password" class="form-control" required>
+    </div>
+    <div id="loginError" class="text-danger mt-2" style="display:none;"></div>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary">Login</button>
+  </div>
+</form>

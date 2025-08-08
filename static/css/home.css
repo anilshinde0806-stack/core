@@ -68,3 +68,409 @@
   margin-bottom: 10px;
   padding: 8px;
 }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            color: #333;
+        }
+        header {
+            background: #e91e63;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+        .hero {
+            background: url("{% static 'images/salon-banner.png' %}") no-repeat center center/cover;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .hero h2 {
+            font-size: 3rem;
+            margin: 0;
+        }
+        .services {
+            padding: 50px 20px;
+            text-align: center;
+        }
+        .services h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+        .service {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .service i {
+            font-size: 2rem;
+            color: #e91e63;
+            margin-bottom: 10px;
+        }
+        .cta {
+            background: #e91e63;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .cta a {
+            display: inline-block;
+            background: white;
+            color: #e91e63;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #booking-section {
+  text-align: center;
+  margin-top: 20px;
+}
+#loadBookingForm {
+  padding: 10px 20px;
+  background-color: #d63384;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#loadBookingForm:hover {
+  background-color: #c82373;
+}
+#formContainer {
+  margin-top: 20px;
+}
+
+
+.products {
+  padding: 60px 20px;
+  background: #fff9f9;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: #e91e63;
+  font-weight: bold;
+}
+
+.product-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.product-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 220px;
+  padding: 15px;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-10px);
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.product-card h3 {
+  margin-top: 15px;
+  font-size: 1.2rem;
+}
+
+.price {
+  color: #555;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.buy-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #e91e63;
+  color: white;
+  text-decoration: none;
+  border-radius: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.buy-btn:hover {
+  background-color: #c2185b;
+}
+
+.badge-new {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #ff4081;
+  color: white;
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  border-radius: 5px;
+}
+@keyframes flashBorder {
+  0% { border-color: #f39c12; }
+  50% { border-color: #e74c3c; }
+  100% { border-color: #f39c12; }
+}
+
+.card {
+  border: 2px solid #f39c12;
+  animation: flashBorder 2s infinite;
+}
+.card {
+  border-radius: 15px;
+  transition: transform 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+.btn-success {
+  font-weight: bold;
+}
+
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f8f8;
+            color: #333;
+        }
+        header {
+            background: #e91e63;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+        .hero {
+            background: url("{% static 'images/salon-banner.png' %}") no-repeat center center/cover;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .hero h2 {
+            font-size: 3rem;
+            margin: 0;
+        }
+        .services {
+            padding: 50px 20px;
+            text-align: center;
+        }
+        .services h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+        .service {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .service i {
+            font-size: 2rem;
+            color: #e91e63;
+            margin-bottom: 10px;
+        }
+        .cta {
+            background: #e91e63;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .cta a {
+            display: inline-block;
+            background: white;
+            color: #e91e63;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #booking-section {
+  text-align: center;
+  margin-top: 20px;
+}
+#loadBookingForm {
+  padding: 10px 20px;
+  background-color: #d63384;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#loadBookingForm:hover {
+  background-color: #c82373;
+}
+#formContainer {
+  margin-top: 20px;
+}
+
+
+.products {
+  padding: 60px 20px;
+  background: #fff9f9;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: #e91e63;
+  font-weight: bold;
+}
+
+.product-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.product-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 220px;
+  padding: 15px;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-10px);
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.product-card h3 {
+  margin-top: 15px;
+  font-size: 1.2rem;
+}
+
+.price {
+  color: #555;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.buy-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #e91e63;
+  color: white;
+  text-decoration: none;
+  border-radius: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.buy-btn:hover {
+  background-color: #c2185b;
+}
+
+.badge-new {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #ff4081;
+  color: white;
+  font-size: 0.75rem;
+  padding: 3px 6px;
+  border-radius: 5px;
+}
+@keyframes flashBorder {
+  0% { border-color: #f39c12; }
+  50% { border-color: #e74c3c; }
+  100% { border-color: #f39c12; }
+}
+
+.card {
+  border: 2px solid #f39c12;
+  animation: flashBorder 2s infinite;
+}
+.card {
+  border-radius: 15px;
+  transition: transform 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+.btn-success {
+  font-weight: bold;
+}
+
+

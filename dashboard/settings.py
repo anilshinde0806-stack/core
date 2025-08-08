@@ -4,11 +4,12 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key secret in production!
-SECRET_KEY = 'django-insecure-your-dev-secret-key-here'
+SECRET_KEY = '!(=7@%zg8@+lz=ewym&49*i0!l-t2m@eu2^ja%k&ws#27yblta'
 
 # DEVELOPMENT SETTINGS
-DEBUG = False
-ALLOWED_HOSTS = ['anilshinde0806.pythonanywhere.com']
+DEBUG = True
+ALLOWED_HOSTS = []
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -28,7 +29,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
+     'whitenoise.middleware.WhiteNoiseMiddleware',
+
 ]
+
+
+
+
 
 ROOT_URLCONF = 'dashboard.urls'
 
@@ -90,7 +99,9 @@ STATIC_URL = '/static/'
 #STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [BASE_DIR / 'static']
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/admin/login/'  # or your custom login URL
@@ -100,7 +111,7 @@ LOGOUT_REDIRECT_URL = 'login'
 
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 DEFAULT_FROM_EMAIL = 'Django<anilshinde0806@gmail.com>'
 #EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # or your SMTP
@@ -108,11 +119,45 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'anilshinde0806@gmail.com'
 EMAIL_HOST_PASSWORD = 'wzlu vghv gvuj hvsj'  # not normal password
-import logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s %(levelname)s %(message)s',
-)
+SECURE_BROWSER_XSS_FILTER = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Or INFO in production
+            'propagate': True,
+        },
+        # Add your app-specific logger here if needed:
+        'your_app_name': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    }
+}
+# settings.py
+TEMPLATES[0]['OPTIONS']['debug'] = True
 
 
 

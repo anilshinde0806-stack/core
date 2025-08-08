@@ -36,18 +36,43 @@
     background-color: #902b5e;
   }
 </style>
+<h2>Register</h2>
 
 <div class="d-flex justify-content-center align-items-center" style="height: 90vh;">
   <div class="salon-card">
     <img src="https://i.imgur.com/ItA8LWa.png" class="salon-logo" alt="Salon Logo">
     <h4 class="mb-3">ߒ Create Your Account</h4>
-    <form method="POST">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <div class="d-grid mt-3">
-        <button type="submit" class="btn btn-register">Register</button>
-      </div>
-    </form>
+      <h2>Register</h2>
+<form method="post">
+  {% csrf_token %}
+
+  {% if form.errors %}
+    <div class="error-messages" style="color: red;">
+      <ul>
+        {% for field in form %}
+          {% for error in field.errors %}
+            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <!-- Render fields -->
+  {% for field in form %}
+    <div>
+      {{ field.label_tag }}<br>
+      {{ field }}
+    </div>
+  {% endfor %}
+
+  <button type="submit">Register</button>
+</form>
+
+
     <div class="text-center mt-3">
       <small>Already have an account? <a href="{% url 'login' %}" style="color:#a94472;">Login here</a></small>
     </div>

@@ -1,39 +1,48 @@
+from django.contrib import messages
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, user_logged_in
 from django.contrib.auth.forms import AuthenticationForm
-#from django.shortcuts import render
 from django.http import HttpResponseRedirect
-#from django.http import JsonResponse
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-#from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import login_required
-#from django.http import JsonResponse
-from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
-#from .forms import BookingForm  # Assuming you've created one
-from django.shortcuts import render
-from django.http import JsonResponse
+from pipenv.core import console
+import logging
 from .forms import BookingForm
 from django.core.mail import send_mail
-
-#from .forms import RegisterForm
-#from django.contrib.auth.views import LoginView, LogoutView
-# Register View
-
+from .models import Booking
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 from django.contrib.auth.forms import UserCreationForm
-
+from .models import Product
+from django.shortcuts import get_object_or_404
+@cache_page(60 * 15)  # Cache the homepage for 15 minutes
 def home(request):
-    return render(request, 'home/newhome.html')
+        products = Product.objects.all()#.order_by('-created_at')
+        return render(request, 'home/newhome.html', {'products': products})
 
-
+# Register View
 def register_view(request):
+    print(request.POST)
+
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
+        print(request.POST)
+        print(form.errors)
+
         if form.is_valid():
             form.save()
+            print('form saved')
             return redirect('login')  # Redirect to login after successful registration
     else:
+
         form = UserCreationForm()
+        console.print(form.errors)  # ߑ check this in the console
+        console.print('form created')
+
     return render(request, 'core/register.html', {'form': form})
 
 # Login View
@@ -43,7 +52,12 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('dashboard')
+            if request.user.is_superuser:
+               return redirect('dashboard')
+               console.print(user.user_type)
+            else:
+               return redirect('home')
+
     else:
         form = AuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
@@ -51,7 +65,7 @@ def login_view(request):
 # Logout View
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('home')
 
 @login_required
 def dashboard(request):
@@ -77,39 +91,19 @@ def booking(request):
 @require_POST
 @login_required
 
-
 def ajax_booking_submit(request):
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
-            existing = Booking.objects.filter(
-                appointment_date=form.cleaned_data['appointment_date'],
-                appointment_time=form.cleaned_data['appointment_time']
-            )
-
-            if existing.exists():
-                return JsonResponse({'error': 'Time slot already booked!'}, status=400)
-
-            if form.is_valid():
-                booking = form.save()
-
-                # ✅ Send confirmation email
-                send_mail(
-                    'Booking Confirmed',
-                    'Thank you for your booking!',
-                    'anilshinde0806@gmail.com',
-                    [booking.email],
-                    fail_silently=False,  # ❗ Set to False to raise any error
-                )
-
-                return JsonResponse({'success': True})
-
-            return JsonResponse({'message': 'Booking successful'})
+            booking = form.save(commit=False)
+            booking.user = request.user  # optional if you're tracking users
+            booking.save()
+            return JsonResponse({'success': True})  # ✅ this must exist
         else:
-            # If form has errors, re-render HTML to return
-            html = render(request, 'partials/booking_form.html', {'form': form}).content.decode('utf-8')
-            return JsonResponse({'form_html': html}, status=400)
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+            return JsonResponse({'success': False, 'error': form.errors.as_json()})
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+#if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
 
 @csrf_exempt
 @login_required
@@ -136,11 +130,45 @@ def ajax_booking_form(request):
         # ߑ This should only render the form partial, NOT the full HTML page
         html = render(request, 'partials/booking_form.html', {'form': form}).content.decode('utf-8')
         return JsonResponse({'form_html': html})
-
-from django.shortcuts import render
-from .models import Booking
-
 def booking_list(request):
     bookings = Booking.objects.all().order_by('-created_at')
     return render(request, 'booking/booking_list.html', {'bookings': bookings})
 
+
+def login_modal_view(request):
+    try:
+     if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user:
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.username}!")
+            logger = logging.getLogger('core')
+            logger.info("Login successful for user %s", user.username)
+
+            if user.is_superuser:
+                print('superuser logged in')
+
+                print("Reverse dashboard URL:", reverse('dashboard'))
+                return JsonResponse({'success': True, 'redirect_url': reverse('dashboard')})
+            else:
+                print('staff user logged in')
+
+                print("Reverse home URL:", reverse('home'))
+                return JsonResponse({'success': True, 'redirect_url': reverse('home')})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid credentials'})
+     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    except Exception as e:
+     return JsonResponse({'success': False, 'error': f'Server error: {str(e)}'})
+    #return render(request, 'core/login_modal_form.html')
+
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, 'products/product_detail.html', {'product': product})
+def checkout(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, 'products/checkout.html', {'product': product})
