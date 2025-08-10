@@ -1,4 +1,3 @@
-<!-- templates/partials/booking_form.html -->
 <form id="bookingForm" method="post" action="{% url 'ajax_booking_submit' %}">
     {% csrf_token %}
     {{ form.as_p }}

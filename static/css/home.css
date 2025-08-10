@@ -94,7 +94,7 @@
             font-weight: 500;
         }
         .hero {
-            background: url("{% static 'images/salon-banner.png' %}") no-repeat center center/cover;
+
             height: 400px;
             display: flex;
             align-items: center;
@@ -297,7 +297,7 @@
             font-weight: 500;
         }
         .hero {
-            background: url("{% static 'images/salon-banner.png' %}") no-repeat center center/cover;
+
             height: 400px;
             display: flex;
             align-items: center;
@@ -445,7 +445,7 @@
 .badge-new {
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: 5%;
   background-color: #ff4081;
   color: white;
   font-size: 0.75rem;
@@ -471,6 +471,36 @@
 }
 .btn-success {
   font-weight: bold;
+}
+.flash {
+    animation: flashAnim 1s ease-in-out 3;
+}
+
+@keyframes flashAnim {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: yellow; }
+}
+.notification {
+    min-width: 250px;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    animation: slideIn 0.4s ease-out;
+}
+.notification-success { background-color: #28a745; } /* green */
+.notification-error   { background-color: #dc3545; } /* red */
+.notification-warning { background-color: #ffc107; color: black; } /* yellow */
+
+@keyframes slideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { transform: translateX(120%); opacity: 0; }
 }
 
 

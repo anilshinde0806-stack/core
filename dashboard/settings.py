@@ -18,7 +18,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     'core'
+    'core',
+    'rest_framework',
+   'corsheaders',
+
+
 ]
 
 MIDDLEWARE = [
@@ -32,13 +36,23 @@ MIDDLEWARE = [
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
      'whitenoise.middleware.WhiteNoiseMiddleware',
-
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 
 
 
+CORS_ALLOW_ALL_ORIGINS = True  # For development — later restrict to your app's domain
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ]
+}
 ROOT_URLCONF = 'dashboard.urls'
 
 TEMPLATES = [
@@ -121,43 +135,6 @@ EMAIL_HOST_USER = 'anilshinde0806@gmail.com'
 EMAIL_HOST_PASSWORD = 'wzlu vghv gvuj hvsj'  # not normal password
 SECURE_BROWSER_XSS_FILTER = True
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-
-    'formatters': {
-        'verbose': {
-            'format': '{asctime} {levelname} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',  # Or INFO in production
-            'propagate': True,
-        },
-        # Add your app-specific logger here if needed:
-        'your_app_name': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    }
-}
-# settings.py
-TEMPLATES[0]['OPTIONS']['debug'] = True
 
 
 

@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<h1>Checkout</h1>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pid, item in cart.items %}
+        <tr>
+            <td><img src="{{ item.image }}" width="60"></td>
+            <td>{{ item.name }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.price|floatformat:2|add:"0"|floatformat:2|floatformat }} × {{ item.quantity }} = ₹{{ item.price|floatformat:2|floatformat|add:"0"|floatformat }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Total: ₹{{ total_price }}</h3>
+
+<form method="POST" action="{% url 'place_order' %}">
+    {% csrf_token %}
+    <button type="submit">Place Order</button>
+</form>
+
+</body>
+</html>
