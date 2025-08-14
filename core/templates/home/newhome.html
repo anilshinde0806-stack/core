@@ -11,6 +11,36 @@ body {
             color: #333;
         }
 
+.cta-btn {
+    display: inline-block;
+    background: #e91e63;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 20px;
+    animation: flash 1.5s ease-in-out infinite;
+    transition: all 0.3s ease;
+}
+
+@keyframes flash {
+    0% {
+        background-color: #e91e63;
+    }
+    50% {
+        background-color: #ff4081;
+    }
+    100% {
+        background-color: #e91e63;
+    }
+}
+
+.cta-btn:hover {
+    transform: scale(1.1);
+}
+
+
 .flash-close {
     animation: flashClose 1.5s ease-in-out infinite;
 }
@@ -152,7 +182,7 @@ body {
 
 @keyframes flash {
     0% {
-        background-color: #e91e63;
+        background-color: #e10e63;
     }
     50% {
         background-color: #ff4081;
@@ -200,64 +230,14 @@ body {
 <div id="products-container" class="product-list"></div>
 <div id="products-container" class="row"></div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    fetch("/api/products/")
-    .then(response => response.json())
-    .then(products => {
-        let container = document.getElementById("products-container");
-        container.innerHTML = "";
-
-        products.forEach(product => {
-            container.innerHTML += `
-                <div class="col-md-4">
-                    <div class="card">
-                        <img src="${product.image}" class="card-img-top" alt="${product.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${product.name}</h5>
-                            <p class="card-text">₹${product.price}</p>
-                            <button class="btn btn-primary buy-now-btn"
-                                    data-id="${product.id}"
-                                    data-name="${product.name}"
-                                    data-price="${product.price}">
-                               API Buy Now
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        // Attach Buy Now event listener
-        document.querySelectorAll(".buy-now-btn").forEach(btn => {
-            btn.addEventListener("click", function() {
-
-               // alert("clicked");
-                let productName =  this.dataset.name;
-                let productPrice =  this.dataset.price;
-
-
-               // alert(productName);
-                document.getElementById("modalTitle").textContent = productName +", Price ₹:"+ productPrice;
-
-
-                new bootstrap.Modal(document.getElementById("buyNowModal")).show();
-            });
-        });
-    })
-    .catch(error => console.error("Error fetching products:", error));
-});
-</script>
-
   </section>
 <span class="badge-new">
-    <div id="cart-container">
-    <h3>Your Cart</h3>
-    <ul id="cart-items-list"></ul>
-    <p>Total: ₹<span id="cart-total">0.00</span></p>
-</div>
+<span id="cartCount">0</span> items - <span id="cartTotal">₹0</span>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cartModal">
+    Cart <span id="cartCount" class="badge bg-danger">0</span>
+</button>
 
-    New</span>
+</span>
 
 <section class="services">
     <h3>Our Services</h3>
@@ -339,36 +319,6 @@ document.addEventListener("DOMContentLoaded", function() {
     <button id="loadBookingForm" class="cta-btn">Book Now</button>
 </section>
 
-<style>
-.cta-btn {
-    display: inline-block;
-    background: #e91e63;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 30px;
-    text-decoration: none;
-    font-weight: bold;
-    margin-top: 20px;
-    animation: flash 1.5s ease-in-out infinite;
-    transition: all 0.3s ease;
-}
-
-@keyframes flash {
-    0% {
-        background-color: #e91e63;
-    }
-    50% {
-        background-color: #ff4081;
-    }
-    100% {
-        background-color: #e91e63;
-    }
-}
-
-.cta-btn:hover {
-    transform: scale(1.1);
-}
-</style>
 
     <!-- Trigger button -->
 
@@ -481,40 +431,39 @@ document.addEventListener("DOMContentLoaded", function() {
 }
 </style>
 <!-- Scripts First -->
-<script src="{% static 'js/modal.js' %}"></script>
+<!-- Cart Modal -->
+<!-- Cart Button -->
+
+<!-- Cart Modal -->
+<div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Your Cart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul id="cart-items" class="list-group">
+          <!-- Cart items will be loaded here -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button id="clear-cart" class="btn btn-danger">Clear Cart</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <div id="booking-response" class="alert alert-success flash-message" style="display:none;">Booking confirmed!</div>
 <!-- THEN put your script here -->
 <script>
-
-$(document).ready(function () {
-    $('.buy-now-btn').on('click', function (e) {
-        e.preventDefault();  // Prevent default scroll-to-top
-
-        const productId = $(this).data('product-id');
-        const productName = $(this).data('product-name');
-
-
-        // Inject product name into the modal body
-        $('#buyNowModal .modal-body').html(
-            `<p>You're about to buy: <strong>${productName}</strong></p>`
-        );
-        const buyModal = new bootstrap.Modal(document.getElementById('buyNowModal'));
-        buyModal.show();
-    });
-// end doc redy
-});
-
-
-</script>
-<script>
 $(document).ready(function () {
  $('#loadBookingForm').click(function () {
-
-
-                $.ajax({
-
+          $.ajax({
 
                     url: '/ajax/booking/form/',  // URL for ajax_booking_form view
                     type: 'GET',
@@ -536,57 +485,392 @@ $(document).ready(function () {
                 // end ajax
                 });
             });
-
-
-
 // end doc redy
 });
 
 </script>
-
 <script>
 
-    $(document).ready(function() {
-  $(document).on('submit', '#bookingForm', function (e) {
-    e.preventDefault();
-    console.log("click bookingForm");
-    let formData = $(this).serialize();
+// Function to get CSRF token from cookies
+async function loadProducts() {
+    try {
 
-    $.ajax({
-        url: '/ajax/booking/submit/',
-        type: 'POST',
-        data: formData,
-        success: function (response) {
-            console.log(response);
-            if (response.status === "login_required") {
-                console.log("quick login if not logged in");
-                $('#bookingModal').modal('hide');
-                $('#loginModal').modal('show');
+        //alert("in loadproducts")
+        const response = await fetch('/api/products/');
+        const products = await response.json();
+
+        let container = document.getElementById('products-container');
+        container.innerHTML = ''; // Clear old products
+
+        // Generate products list
+        products.forEach(product => {
+                                    container.innerHTML += `<li>
+                                      <div class="product-card">
+                                        <img src="${product.image}" alt="${product.name}">
+                                        <h3>${product.name}</h3>
+                                        <p>₹${product.price}</p>
+                                       <button class="add-to-cart-btn" onclick="addToCart1(${product.id},'${product.name}',${product.price})">Add to Cart</button>
+                                      </div>
+                                   </li>`
+
+        });
+
+
+
+    } catch (error) {
+
+        alert('laod error'+error);
+        console.log('Error loading products:', error);
+    }
+}
+document.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+<script>
+$(document).ready(function() {
+    // CSRF setup
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
-            else if (response.status === "success") {
-                $('#bookingModal').modal('hide');
-                $('#booking-response')
-                    .fadeIn()
-                    .delay(3000)
-                    .fadeOut();
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    $.ajaxSetup({ headers: { "X-CSRFToken": csrftoken } });
+
+    $(document).on('submit', '#bookingForm', function (e) {
+        e.preventDefault();
+
+        // Remove old AJAX error messages
+        $(".ajax-error").remove();
+
+        let formData = $(this).serialize();
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.status === "login_required") {
+                    $('#bookingModal').modal('hide');
+                    $('#loginModal').modal('show');
+                }
+                else if (response.status === "success") {
+                    $('#bookingModal').modal('hide');
+                    $('#booking-response')
+                        .fadeIn()
+                        .delay(3000)
+                        .fadeOut();
+                }
+                else if (response.status === "error") {
+                    // Loop through Django form errors and inject after the relevant <p>
+                    for (let field in response.errors) {
+                        let errorText = response.errors[field].join(", ");
+                        let fieldElement = $(`#bookingForm [name="${field}"]`);
+                        fieldElement.closest('p').append(
+                            `<span class="ajax-error" style="color:red;display:block;font-size:0.9em;">${errorText}</span>`
+                        );
+                    }
+
+                    // Handle non-field errors
+                    if (response.errors.__all__) {
+                        let nonFieldErrors = response.errors.__all__.join(", ");
+                        $('#bookingForm').prepend(
+                            `<div class="ajax-error" style="color:red;margin-bottom:10px;">${nonFieldErrors}</div>`
+                        );
+                    }
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", status, error);
             }
-            else if (response.status === "error") {
-                console.log("Form errors:", response.errors);
+        });
+    });
+});
+// add from cart
+async function cleanCart() {
+    // 1️⃣ Clear the cart on the server
+    await fetch("/api/cart/clean/", { method: "POST" });
+
+    // 2️⃣ Immediately fetch fresh cart data
+    await loadCartItems();
+}
+// Function to check if modal is open
+function isCartModalOpen() {
+    const modal = document.getElementById("cartModal");
+    return modal.classList.contains("show");
+}
+document.addEventListener("DOMContentLoaded", () => {
+    const cartModal = document.getElementById('cartModal');
+    const cartList = document.getElementById('cart-items');
+    const clearCartBtn = document.getElementById('clear-cart');
+
+    if (!cartModal || !cartList) {
+        console.error("Cart modal or cart-items element is missing from DOM.");
+        return;
+    }
+
+    // When modal opens, fetch latest cart
+    cartModal.addEventListener('show.bs.modal', async () => {
+        await loadCartItems();
+    });
+
+    // Function to fetch and display cart
+    async function loadCartItems() {
+        try {
+            const res = await fetch('/api/cart/');
+            if (!res.ok) throw new Error("Failed to fetch cart");
+            const data = await res.json();
+
+            cartList.innerHTML = ""; // ✅ clear previous items
+
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item', 'd-flex', 'justify-content-between');
+                    li.innerHTML = `
+                        ${item.name} - ${item.quantity} × ₹${item.price}
+                        <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">Remove</button>
+                    `;
+                    cartList.appendChild(li);
+                });
+            } else {
+                cartList.innerHTML = "<li class='list-group-item'>Your cart is empty</li>";
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("AJAX Error:", status, error);
+        } catch (err) {
+            console.error("Error loading cart:", err);
+        }
+    }
+
+    // Clear cart button
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/cart/clear/', { method: 'POST', headers: { 'X-CSRFToken': getCSRFToken() } });
+                await loadCartItems(); // reload cart after clearing
+            } catch (err) {
+                console.error("Error clearing cart:", err);
+            }
+        });
+    }
+
+    // Handle remove item click
+    cartList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('remove-item')) {
+            const id = e.target.dataset.id;
+            try {
+                await fetch(`/api/cart/remove/${id}/`, { method: 'POST', headers: { 'X-CSRFToken': getCSRFToken() } });
+                await loadCartItems();
+            } catch (err) {
+                console.error("Error removing item:", err);
+            }
         }
     });
-  });
+
+    // CSRF token helper
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
 });
 
-</script>
+// Add item to cart
+async function addToCart(productId) {
+    await fetch(`/api/cart/add/${productId}/`, { method: "POST" });
 
-<script>
-    $(document).ready(function() {
+    // Update cart number in header
+    await updateCartCount();
 
-       $("#loginForm").submit(function(e) {
+    // If modal is open, refresh its content
+    if (isCartModalOpen()) {
+        await loadCartItems();
+    }
+}
+
+// Update cart count in header
+async function updateCartCount() {
+    const res = await fetch("/api/cart/count/");
+    const data = await res.json();
+    document.getElementById("cartcount").textContent = data.count;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const cartModal = document.getElementById('cartModal');
+    const cartList = document.getElementById('cart-items');
+    const clearCartBtn = document.getElementById('clear-cart');
+
+    if (!cartModal || !cartList) {
+        console.error("Cart modal or cart-items element is missing from DOM.");
+        return;
+    }
+
+    // When modal opens, fetch latest cart
+    cartModal.addEventListener('show.bs.modal', async () => {
+        await loadCartItems();
+    });
+
+    // Function to fetch and display cart
+    async function loadCartItems() {
+        try {
+            const res = await fetch('/api/cart/');
+            if (!res.ok) throw new Error("Failed to fetch cart");
+            const data = await res.json();
+
+            cartList.innerHTML = ""; // ✅ clear previous items
+
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item', 'd-flex', 'justify-content-between');
+                    li.innerHTML = `
+                        ${item.name} - ${item.quantity} × ₹${item.price}
+                        <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">Remove</button>
+                    `;
+                    cartList.appendChild(li);
+                });
+            } else {
+                cartList.innerHTML = "<li class='list-group-item'>Your cart is empty</li>";
+            }
+        } catch (err) {
+            console.error("Error loading cart:", err);
+        }
+    }
+
+    // Clear cart button
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/cart/clear/', { method: 'POST', headers: { 'X-CSRFToken': getCSRFToken() } });
+                await loadCartItems(); // reload cart after clearing
+            } catch (err) {
+                console.error("Error clearing cart:", err);
+            }
+        });
+    }
+
+    // Handle remove item click
+    cartList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('remove-item')) {
+            const id = e.target.dataset.id;
+            try {
+                await fetch(`/api/cart/remove/${id}/`, { method: 'POST', headers: { 'X-CSRFToken': getCSRFToken() } });
+                await loadCartItems();
+            } catch (err) {
+                console.error("Error removing item:", err);
+            }
+        }
+    });
+
+    // CSRF token helper
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+});
+
+// On modal open, always load latest items
+//document.getElementById('cartModal').addEventListener('show.bs.modal', loadCartItems);
+async function addToCart1(product_id, productName, price) {
+
+     const formData = new FormData();
+    formData.append('product_id', product_id);
+    formData.append('name', productName);
+    formData.append('price', price);
+    //alert(formData);
+    const response = await fetch('/api/cart/add/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken') // Needed for Django POST
+        }
+    });
+
+    const data = await response.json();
+
+    if (data.total_items !== undefined) {
+        document.getElementById('cartCount').innerText = data.total_items;
+        document.getElementById('cartTotal').innerText = "₹" + data.total_price;
+
+
+        }else{alert(data.total_items);}
+
+     // loadCartDetails();
+}
+
+// Function to fetch and refresh cart items inside modal
+async function refreshCartModal() {
+    try {
+        const res = await fetch("/api/cart/");
+        if (!res.ok) throw new Error("Failed to fetch cart data");
+
+        const data = await res.json();
+
+        // Update count badge
+        document.getElementById("cartCount").textContent = data.count;
+
+        // Update modal items
+        const cartItemsContainer = document.getElementById("cartItems");
+        cartItemsContainer.innerHTML = ""; // Clear old items
+
+        if (data.items.length === 0) {
+            cartItemsContainer.innerHTML = `<p class="text-muted">Your cart is empty.</p>`;
+            return;
+        }
+
+        data.items.forEach(item => {
+            cartItemsContainer.innerHTML += `
+                <div class="cart-item d-flex justify-content-between align-items-center mb-2" id="cart-item-${item.id}">
+                    <span>${item.name} - ₹${item.price} × ${item.quantity}</span>
+                    <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">Remove</button>
+                </div>
+            `;
+        });
+
+    } catch (err) {
+        console.log("Error refreshing cart modal:", err);
+    }
+}
+
+// Load cart data when modal is opened
+document.getElementById("cartModal").addEventListener("show.bs.modal", async () => {
+    await refreshCartModal();
+});
+
+// Remove item with fade-out effect
+document.addEventListener("click", async (event) => {
+    if (event.target.classList.contains("remove-item")) {
+        const productId = event.target.dataset.id;
+        const cartItem = document.getElementById(`cart-item-${productId}`);
+
+        const res = await fetch(`/api/cart/remove/${productId}/`, {method: "POST"});
+
+        if (res.ok) {
+            // Fade out animation before removing from DOM
+           // cartItem.style.transition = "opacity 0.3s ease";
+            cartItem.style.opacity = "0";
+            setTimeout(async () => {
+                cartItem.remove();
+                await refreshCartModal(); // Reload cart after animation
+            }, 300);
+        }
+    }
+});
+
+function getCSRFToken() {
+    return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+}
+
+// Load cart when modal opens
+//document.getElementById('cartModalBtn').addEventListener('click', loadCartDetails);
+
+$(document).ready(function() {
+
+  $("#loginForm").submit(function(e) {
     e.preventDefault();
 
     $.ajax({
@@ -603,8 +887,13 @@ $(document).ready(function () {
             }
         }
     });
+    });
 
-    function showNotification(type, text) {
+
+        //end of doc redy
+
+    });
+   function showNotification(type, text) {
     const container = document.getElementById("notification-container");
 
     // Create notification div
@@ -616,24 +905,23 @@ $(document).ready(function () {
 
     // Auto-remove after 3 seconds with fade animation
     setTimeout(() => {
-        notif.style.animation = "fadeOut 0.1s forwards";
+        notif.style.animation = "fadeOut 0.9s forwards";
         setTimeout(() => notif.remove(), 500);
     }, 8000);
 }
 
 
+// Load cart data when modal is opened
+document.getElementById("cartModal").addEventListener("show.bs.modal", async () => {
+    //await refreshCartModal();
 });
 
 
-        //end of doc redy
-
-    });
-
+// Call on page load
+//document.addEventListener("DOMContentLoaded", refreshCartModal());
 </script>
 
-
-
-    <style>
+<style>
 .flash-message {
     animation: flashMessage 1.5s ease-in-out infinite;
 }
@@ -651,36 +939,7 @@ $(document).ready(function () {
 }
 </style>
 
-   <div class="modal fade" id="buyNowModal" tabindex="-1" aria-labelledby="buyNowModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" >Confirm Purchase</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="modalTitle">
-        <!-- Product info will be injected here -->
-      </div>
-        <div class="modal-body" id="modalDescription"></div>
-        <div class="modal-body" id="modalPrice"></div>
-
-<form id="checkoutForm">
-    {% csrf_token %}
-    <input type="hidden" id="product_id" value="{{ product.id }}">
-    <input type="number" id="modalQuantity" value="1" min="1">
-    <button type="button" id="proceedCheckoutBtn">Proceed to Checkout</button>
-</form>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-
-      </div>
-    </div>
-  </div>
-</div>
-
 
 </body>
 
 {% endblock %}
-</html>

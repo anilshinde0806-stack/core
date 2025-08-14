@@ -1,18 +1,13 @@
 import json
-from django.contrib.auth.views import LogoutView
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, logger
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt  # only if needed
-from decimal import Decimal
-from django.contrib.auth import login, logout, authenticate, user_logged_in
-from pandas.io.sas.sas_constants import column_name_text_subheader_length
 from pipenv.core import console
+from django.views.decorators.http import require_GET
 from .forms import BookingForm
 from .models import Booking
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.template.loader import render_to_string
@@ -22,8 +17,11 @@ from functools import wraps
 from django.views.decorators.vary import vary_on_cookie
 from django.shortcuts import render, redirect
 from django.contrib import messages
-
-
+from django.contrib.auth import login
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_protect
+import logging
+from django.contrib.auth import logout, authenticate
 
 def anonymous_cache_page(timeout):
     def decorator(view_func):
@@ -82,21 +80,20 @@ def login_view(request):
     return render(request, 'core/login.html', {'form': form})
 
 # Logout View
-@never_cache
-@never_cache
+@require_http_methods(["POST"])  # ✅ Only allow POST for security
+@csrf_protect  # ✅ CSRF protection
 def logout_view(request):
-    logout(request)
+    # ✅ Remove cart data if it exists
+
     request.session.flush()
-    response = redirect('home')
-    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    try:
-        del request.session['cart']  # Remove cart on logout
-    except KeyError:
-        pass
 
-    return response
+    #request.session.pop('cart', None)
 
-@login_required
+    # ✅ Log out the user
+    logout(request)
+
+    # ✅ Redirect to homepage
+    return redirect('home')  # 'home' should be the name of your homepage URLlogin_required
 def dashboard(request):
     return render(request, 'dashboard/dashboard.html')
 @login_required
@@ -116,28 +113,34 @@ def booking(request):
         return HttpResponseRedirect('/')
     return render(request, 'dashboard/booking.html')
 
-@csrf_exempt  # if needed, but prefer proper CSRF token usage instead
+
+
+ogger = logging.getLogger(__name__)
+
+@require_http_methods(["POST"])  # ✅ Only allow POST for booking submission
+@csrf_exempt  # ❌ Prefer CSRF token in AJAX — only keep if you can’t send CSRF token
 def ajax_booking_submit(request):
-
     try:
-
-
+        # ✅ Check login
         if not request.user.is_authenticated:
             return JsonResponse({"status": "login_required"})
 
-        if request.method == "POST":
-            form = BookingForm(request.POST)
-            if form.is_valid():
-                booking = form.save()
-                return JsonResponse({"status": "success", "booking_id": booking.id})
-            else:
-                return JsonResponse({'status': 'error', 'message': 'Invalid HTTP method'}, status=405)
+        # ✅ Handle POST booking
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save()
+            return JsonResponse({"status": "success", "booking_id": booking.id})
+        else:
+            # Return form errors instead of a wrong method message
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Form validation failed',
+                'errors': form.errors
+            })
 
-        return JsonResponse({"status": "invalid_method"})
     except Exception as e:
-      #  logger.error(f"Exception in ajax_booking_submit: {e}", exc_info=True)
+        logger.error(f"Exception in ajax_booking_submit: {e}", exc_info=True)
         return JsonResponse({'status': 'error', 'message': 'Server error'}, status=500)
-
 @csrf_exempt
 @login_required
 def ajax_booking(request):
@@ -156,11 +159,15 @@ def booking_form_view(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         html = render(request, 'partials/booking_form.html', {'form': form}).content.decode('utf-8')
         return JsonResponse({'html': html})
-    return render(request, 'newhome.html', {'form': form})
+    return render(request, 'home/newhome.html', {'form': form})
 
 def ajax_booking_form(request):
-
-    form = BookingForm()
+    form = BookingForm(initial={
+        'name': request.user.get_full_name() if request.user.is_authenticated else '',
+        'email': request.user.email if request.user.is_authenticated else '',
+        'appointment_date': ''
+    })
+    #form = BookingForm()
     html = render_to_string('partials/booking_form.html', {'form': form}, request=request)
 
     return JsonResponse({'form_html': html})
@@ -192,39 +199,41 @@ def checkout(request, pk):
 @require_POST
 def add_to_cart(request):
     if request.method == "POST":
-        try:
-                cart = request.session.get('cart', {})
-                data = json.loads(request.body)  # expecting JSON POST
-                product_id = data.get('product_id')
-                product_name = data.get('product_name')
-                price = data.get('price')
-                quantity = data.get('quantity', 1)
-                console.log(product_id)
-                console.log(product_name)
-                console.log(price)
-                console.log(quantity)
+        product_id = request.POST.get('product_id')
+        name = request.POST.get('name')
+        price = float(request.POST.get('price'))
+
+        cart = request.session.get('cart', {})
+
+        if product_id in cart:
+            cart[product_id]['quantity'] += 1
+        else:
+            cart[product_id] = {'name': name, 'price': price, 'quantity': 1}
+
+        request.session['cart'] = cart
+
+        total_items = sum(item['quantity'] for item in cart.values())
+        total_price = sum(item['price'] * item['quantity'] for item in cart.values())
+        console.log(f"Total items: {cart}")
+        cart_items = []
+        total_price = 0
+
+        for item_id, item in cart.items():
+            subtotal = item['price'] * item['quantity']
+            total_price += subtotal
+            cart_items.append({
+                'id': item_id,
+                'name': item['name'],
+                'price': item['price'],
+                'quantity': item['quantity'],
+                'subtotal': subtotal
+            })
 
 
-                if product_id in cart:
-                    cart[product_id]['quantity'] += 1
-                else:
-                    cart[product_id] = {
-                        'name': product_name,
-                        'price': float(price),
-                        'quantity': quantity,
-                    }
 
-                request.session['cart'] = cart  # Save back to session!
-                request.session.modified = True  # Mark session as modified so Django saves it
+        return JsonResponse({'items': cart_items,'total_items': len(cart_items),'total_price': total_price })
 
-                return JsonResponse({'status': 'success', 'cart': cart})
-
-
-        except Exception as e:
-            return JsonResponse({"status": "try error", "message": str(e)}, status=400)
-
-    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
-
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 def checkout_view(request):
     if not request.user.is_authenticated:
         request.session.pop('cart', None)  # Clear cart for anonymous or logged out users
@@ -241,38 +250,64 @@ def checkout_view(request):
         'total_price': total_price
     })
 
-def place_order(request):
-    if request.method == "POST":
-        cart = request.session.get('cart', {})
-        if not cart:
-            return redirect('home')
-
-        # TODO: Save order to DB here
-
-        request.session['cart'] = {}  # Clear cart
-        messages.success(request, "Order placed successfully!")
-        return redirect('home')
 
 # views.py
 from django.http import JsonResponse
-
 def get_cart(request):
     cart = request.session.get('cart', {})
+    total_items = sum(item['quantity'] for item in cart.values())
+    total_price = sum(item['price'] * item['quantity'] for item in cart.values())
 
-    console.log(cart)
-    # Opticart.onally, format cart items nicely
+    return JsonResponse({
+        'total_items': total_items,
+        'total_price': total_price
+    })
+@login_required
+@csrf_exempt  # if using JS fetch without CSRF in headers
+def remove_cart_item(request, product_id):
 
-    cart.items()
+    console.log(f"p id :{product_id}")
+    if request.method == "POST":
+        cart = request.session.get("cart", {})
+
+        # product_id might come as int or str, normalize
+        product_id = str(product_id)
+
+        if product_id in cart:
+            del cart[product_id]
+            request.session["cart"] = cart
+            return JsonResponse({"success": True, "message": "Item removed", "count": len(cart)})
+
+        return JsonResponse({"success": False, "message": "Item not found"}, status=404)
+
+    return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
+
+
+@login_required
+@require_GET
+def cart_details_api(request):
+    cart = request.session.get('cart', {})
+    console.log(f"aCasrft API details: {cart}")
     cart_items = []
-    for key, item in cart.items():
+    total_price = 0
+
+    for item_id, item in cart.items():
+        subtotal = item['price'] * item['quantity']
+        total_price += subtotal
         cart_items.append({
-            'product_id': key,
-            'product_name': item['name'],
+            'id': item_id,
+            'name': item['name'],
             'price': item['price'],
             'quantity': item['quantity'],
-            'total': float(item['price']) * item['quantity'],
+            'subtotal': subtotal
         })
-    total_price = sum(item['total'] for item in cart_items)
-
     console.log(cart_items)
-    return JsonResponse({'cart_items': cart_items, 'total_price': total_price})
+
+
+    return JsonResponse({'items': cart_items, "total_items":len(cart_items),'total_price': total_price})
+
+
+def clear_cart(request):
+    request.session['cart'] = {}  # Empty dict for cart
+    request.session.modified = True
+    return JsonResponse({"message": "Cart cleared"})

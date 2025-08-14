@@ -1,7 +1,5 @@
 from django.urls import path
 from . import views
-from django.contrib.auth.views import LoginView
-#from .views import ajax_login
 
 
 urlpatterns = [
@@ -11,9 +9,9 @@ urlpatterns = [
 
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
-    path('logout/', views.logout, name='logout'),
+    path('logout/', views.logout_view, name='logout'),
     path('form1/', views.form1_view, name='form1'),
-    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
+    #path('login/', LoginView.as_view(template_name='login.html'), name='login'),
     path('dashboard/', views.dashboard, name='dashboard'),
 path('book/', views.booking, name='booking'),
 
@@ -26,9 +24,14 @@ path('product/<int:pk>/', views.product_detail, name='product_detail'),
 path('checkout/<int:pk>/', views.checkout, name='checkout'),
 path('checkout/', views.checkout_view, name='checkout'),
 path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
-path('place-order/', views.place_order, name='place_order'),
-path('api/cart/', views.get_cart, name='get_cart'),
+path('api/cart1/', views.get_cart, name='get_cart'),
+path('api/cart/add/', views.add_to_cart, name='cart_add'),
 
+path("api/cart/remove/<int:product_id>/", views.remove_cart_item, name="remove_cart_item"),
+
+    #path('api/cart/remove/', views.cart_remove_api, name='cart_remove_api'),
+    path('api/cart/', views.cart_details_api, name='cart_details_api'),
+path("api/cart/clear/", views.clear_cart, name="clear_cart"),
 
 ]
 
