@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Waving Indian Flag</title>
+<style>
+    body {
+        background: #f0f0f0;
+        text-align: center;
+        font-family: sans-serif;
+    }
+    canvas {
+        margin-top: 20px;
+        background: #fff;
+        border: 1px solid #ccc;
+    }
+</style>
+</head>
+<body>
+
+<h1>Waving Indian Flag ߇߇</h1>
+<canvas id="flagCanvas" width="900" height="600"></canvas>
+
+<script>
+const canvas = document.getElementById("flagCanvas");
+const ctx = canvas.getContext("2d");
+
+const width = canvas.width;
+const height = canvas.height;
+const stripeHeight = height / 3;
+const centerX = width / 2;
+const centerY = height / 2;
+const chakraRadius = stripeHeight * 0.4;
+
+let t = 0; // time
+
+function drawWavingFlag() {
+    ctx.clearRect(0, 0, width, height);
+
+    const waveAmplitude = 10; // pixels
+    const waveLength = 150; // pixels
+    const waveSpeed = 0.05; // radians per frame
+
+    // Function to create wave offset
+    function waveY(x) {
+        return Math.sin((x / waveLength) + t) * waveAmplitude;
+    }
+
+    // Draw stripes with wave effect
+    for (let yStripe = 0; yStripe < 3; yStripe++) {
+        ctx.beginPath();
+        for (let x = 0; x <= width; x++) {
+            const yOffset = waveY(x);
+            const y = yStripe * stripeHeight + yOffset;
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+            ctx.lineTo(x, (yStripe + 1) * stripeHeight + yOffset);
+        }
+        ctx.closePath();
+
+        if (yStripe === 0) ctx.fillStyle = "#FF9933";
+        if (yStripe === 1) ctx.fillStyle = "#FFFFFF";
+        if (yStripe === 2) ctx.fillStyle = "#138808";
+        ctx.fill();
+    }
+
+    // Draw Ashoka Chakra at center of white stripe
+    ctx.save();
+    ctx.translate(centerX, centerY + waveY(centerX));
+
+    // Outer circle
+    ctx.strokeStyle = "#000080";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, chakraRadius, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // 24 spokes
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 24; i++) {
+        const angle = (i * 2 * Math.PI) / 24;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(chakraRadius * Math.cos(angle), chakraRadius * Math.sin(angle));
+        ctx.stroke();
+    }
+
+    // Inner hub
+    ctx.fillStyle = "#000080";
+    ctx.beginPath();
+    ctx.arc(0, 0, chakraRadius * 0.08, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.restore();
+
+    // Update time
+    t += waveSpeed;
+
+    requestAnimationFrame(drawWavingFlag);
+}
+
+// Start animation
+drawWavingFlag();
+</script>
+
+</body>
+</html>

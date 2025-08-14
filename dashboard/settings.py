@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'core',
     'rest_framework',
    'corsheaders',
-
+    'cart1',
 
 ]
 
@@ -66,11 +66,15 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cart1.context_processors.cart',
             ],
         },
     },
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://anilshinde0806.pythonanywhere.com"
+]
 WSGI_APPLICATION = 'dashboard.wsgi.application'
 
 # Database
@@ -134,6 +138,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'anilshinde0806@gmail.com'
 EMAIL_HOST_PASSWORD = 'wzlu vghv gvuj hvsj'  # not normal password
 SECURE_BROWSER_XSS_FILTER = True
+#SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 

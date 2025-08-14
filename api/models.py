@@ -11,7 +11,7 @@ class Product(models.Model):
         return self.name
 
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='api_bookings')
     date = models.DateField()
     time = models.TimeField()
     status = models.CharField(max_length=20, default='Pending')

@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),  # ✅ Include your app's urls
     path('api/', include('api.urls')),  # ߑ New API route
+    path('cart1/', include('cart1.urls')),  # ߑ New API route
 ]
 
 if settings.DEBUG:
