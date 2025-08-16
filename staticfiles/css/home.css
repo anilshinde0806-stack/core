@@ -242,7 +242,7 @@
 .badge-new {
   position: absolute;
   top: 10px;
-  left: 10px;
+  right: 30px;
   background-color: #ff4081;
   color: white;
   font-size: 0.75rem;
@@ -408,22 +408,6 @@
 
 .buy-btn:hover {
   background-color: #c2185b;
-}
-
-.badge-new {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background-color: #ff4081;
-  color: white;
-  font-size: 0.75rem;
-  padding: 3px 6px;
-  border-radius: 5px;
-}
-@keyframes flashBorder {
-  0% { border-color: #f39c12; }
-  50% { border-color: #e74c3c; }
-  100% { border-color: #f39c12; }
 }
 
 .card {

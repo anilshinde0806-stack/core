@@ -36,9 +36,9 @@ def anonymous_cache_page(timeout):
     return decorator
 
 def home(request):
-    return render(request, 'index.html', {})
-    #products = Product.objects.all()
-   # return render(request, 'home/newhome.html', {'products': products})
+    #return render(request, 'index.html', {})
+   products = Product.objects.all()
+   return render(request, 'home/newhome.html', {'products': products})
 
 
 # Register View
@@ -81,14 +81,14 @@ def login_view(request):
     return render(request, 'core/login.html', {'form': form})
 
 # Logout View
-@require_http_methods(["POST"])  # ✅ Only allow POST for security
+# ✅ Only allow POST for security
  # ✅ CSRF protection
 def logout_view(request):
     # ✅ Remove cart data if it exists
 
     #request.session.flush()
 
-    request.session.pop('cart', None)
+    request.session.pop('cart', {})
 
     # ✅ Log out the user
     logout(request)

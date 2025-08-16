@@ -30,12 +30,6 @@
   </div>
 </div>
 
-<span class="badge-new">
-items - <span id="cartTotal">₹0</span>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cartModal" id="cart">
-    Cart <span id="cartCount" class="badge bg-danger">0</span>
-</button>
-</span>
 
 <section class="services">
     <h3>Our Services</h3>
@@ -135,31 +129,41 @@ items - <span id="cartTotal">₹0</span>
     </div>
 </section>
 <!-- Cart Modal -->
-
 <!-- Cart Modal -->
 <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
+
       <div class="modal-header">
-        <h5 class="modal-title" id="cartModalLabel">Your Cart</h5>
+        <h5 class="modal-title" id="cartModalLabel">ߛ My Cart</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+
       <div class="modal-body">
-        <table class="table table-striped">
-          <thead>
+        <table id="cart-table" class="table table-bordered text-center">
+          <thead class="table-light">
             <tr>
-              <th>Item</th>
+              <th>Product</th>
               <th>Price</th>
-              <th>Qty</th>
+              <th>Quantity</th>
               <th>Subtotal</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody id="cartTableBody"></tbody>
+          <tbody>
+            <!-- Cart items injected here -->
+          </tbody>
         </table>
+
+        <div id="cart-summary" class="mt-3 text-end">
+          <p><b>Total Items:</b> <span id="cart-qty">0</span></p>
+          <p><b>Total Price:</b> ₹<span id="cart-price">0.00</span></p>
+        </div>
       </div>
+
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <a href="/checkout/" class="btn btn-success">Checkout</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+        <a href="/checkout/" class="btn btn-primary">Checkout</a>
       </div>
     </div>
   </div>
@@ -218,7 +222,7 @@ async function loadProducts() {
                                         <img src="${product.image}" alt="${product.name}">
                                         <h3>${product.name}</h3>
                                         <p>₹${product.price}</p>
-                                       <button class="buy-btn" onclick="addToCart1(${product.id},'${product.name}',${product.price})">Add to Cart</button>
+                                       <button class="buy-btn" type="button" onclick="addToCart1(${product.id})" >Add to Cart</button>
                                        </div></li></ul>`
                                          });
     } catch (error) {
@@ -283,33 +287,29 @@ $(document).ready(function() {
 });
 
 
-async function addToCart1(product_id, productName, price) {
+async function addToCart1(product_id) {
+        //  e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('product_id', product_id);
-    formData.append('name', productName);
-    formData.append('price', price);
-    //alert(formData);
-    const response = await fetch('/api/cart/add/', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken') // Needed for Django POST
-        }
-    });
+       // alert(product_id)
+          $.ajax({
 
-    const data = await response.json();
-
-    if (data.total_items !== undefined) {
-
-        //alert(data.total_items);
-        document.getElementById('cartCount').innerText = data.total_items;
-        document.getElementById('cartTotal').innerText = "₹" + data.total_price;
+                    type: 'POST',
+                    url: '{% url 'cart_add' %}',
+                    data:{product_id: product_id,csrfmiddlewaretoken: getCSRFToken(),action:'post'},
+                    success: function(json) {
+                     $("#cart-price").text("₹" +json.total_price);
+                     $("#cart-count").text(json.total_quantity);
+                     updateCartSummary(json);
 
 
-        }else{alert("Product Not add , Try again!");}
 
-     // loadCartDetails();
+                    },
+
+                    error: function (xhr, status, error) {
+                      alert("Cart not added")                   }
+                });
+                // end ajax
+
 }
 
 // Remove item with fade-out effect
@@ -387,100 +387,81 @@ document.getElementById("cartModal").addEventListener("show.bs.modal", async () 
 });
 </script>
 <script>
-$(document).ready(function () {
- $('#cart').click(function () {
-
-      //e.preventDefault();
-          $.ajax({
-
-                    url: 'api/cart/',  // URL for ajax_booking_form view
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                      let cartHtml = '';
-                    if (data.items.length === 0) {
-                        cartHtml.innerHTML = `<tr><td colspan="3"><p class="text-muted">Your cart is empty.</p></td></tr>`;
-                        return;
-                    }
-                      alert(data.items.length);
-                    data.items.forEach(item => {
-                        cartHtml += `
-            <tr>
-                <td>${item.name}</td>
-                <td>₹${item.price}</td>
-                <td>
-                    <button class="btn btn-sm btn-danger" onclick="removeFromCart('${item.id}')">-</button>
-                    ${item.quantity}
-                    <button class="btn btn-sm btn-success" onclick="addToCart('${item.id}', '${item.name}', ${item.price})">+</button>
-                </td>
-                <td>₹${item.subtotal}</td>
-                   </tr>`;
-                    });
-            cartHtml += `<tr>
-                        <td colspan="3"><strong>Total</strong></td>
-                        <td><strong>₹${data.total_price}</strong></td>
-                    </tr>`;
-                    document.getElementById('cartTableBody').innerHTML = cartHtml;
-                    document.getElementById("cartCount").textContent = data.count;
-
-
-                    },
-                    error: function () {
-                        alert('Failed to load cart item form.');
-                    }
-
-                // end ajax
-                });
-            });
-// end doc redy
-});
-async function loadCartDetails() {
-
-    //$(document).ready(function () {
-            alert("load function");
-          $.ajax({
-
-                    url: 'api/cart/',  // URL for ajax_booking_form view
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                    document.getElementById("cartCount").textContent = data.count;
-                      let cartHtml = '';
-                    if (data.items.length === 0) {
-                        cartHtml.innerHTML = `<tr><td colspan="3"><p class="text-muted">Your cart is empty.</p></td></tr>`;
-                        return;
-                    }
-
-                    data.items.forEach(item => {
-                        cartHtml += `
-            <tr>
-                <td>${item.name}</td>
-                <td>₹${item.price}</td>
-                <td>
-                    <button class="btn btn-sm btn-danger" onclick="removeFromCart('${item.id}')">-</button>
-                    ${item.quantity}
-                    <button class="btn btn-sm btn-success" onclick="addToCart('${item.id}', '${item.name}', ${item.price})">+</button>
-                </td>
-                <td>₹${item.subtotal}</td>
-                   </tr>`;
-                    });
-            cartHtml += `<tr>
-                        <td colspan="3"><strong>Total</strong></td>
-                        <td><strong>₹${data.total_price}</strong></td>
-                    </tr>`;
-                    document.getElementById('cartTableBody').innerHTML = cartHtml;
-                    },
-                    error: function () {
-                        alert('Failed to load cart item form.');
-                    }
-
-                // end ajax
-               // });
-            });
-// end doc redy
-
-}
 document.addEventListener('DOMContentLoaded', loadProducts);
+function updateCartSummary(data) {
+    // ✅ Update modal totals
+
+    $("#cart-price").text("₹" +data.total_price);
+
+    // ✅ Update navbar count
+    $("#cart-count").text(data.total_quantity);
+
+    // ✅ Rebuild modal table
+    let tbody = $("#cart-table tbody");
+     tbody.empty();
+     //alert(data.items.length)
+    if (data.items.length === 0) {
+        tbody.append("<tr><td colspan='5'>ߛ Cart is empty</td></tr>");
+        return;
+    }
+
+    data.items.forEach(item => {
+        let row = `
+            <tr data-id="${item.id}">
+                <td>${item.name}</td>
+                <td>₹${item.price}</td>
+                <td>
+                    <input type="number" class="update-qty form-control d-inline"
+                           value="${item.quantity}" min="1" style="width:70px">
+                </td>
+                <td>₹${item.subtotal}</td>
+                <td>
+                    <button class="btn btn-sm btn-success update-cart">Update</button>
+                    <button class="btn btn-sm btn-danger remove-from-cart">Remove</button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+}
+$('#cartModal').on('show.bs.modal', function () {
+
+    alert("cart loaded")
+    $.get("/cart1/detail/", function (data) {
+        updateCartSummary(data);
+    });
+});
+
+$(document).ready(function () {
+    $.get("/cart1/detail/", function (data) {
+        updateCartSummary(data);
+    });
+});
+
+$(document).on("click", ".remove-from-cart", function() {
+    let productId = $(this).closest("tr").data("id");
+//alert(productId);
+    $.post("/cart1/remove/", { product_id: productId, csrfmiddlewaretoken: csrftoken ,action:'post'},
+        function(data) {
+            updateCartSummary(data);  // ✅ refresh
+        }
+    );
+});
+$(document).on("click", ".update-cart", function() {
+    let row = $(this).closest("tr");
+    let productId = row.data("id");
+    let qty = row.find(".update-qty").val();
+
+    $.post("/cart1/update/", { product_id: productId, quantity: qty, csrfmiddlewaretoken: csrftoken,action:'post' },
+        function(data) {
+            updateCartSummary(data);  // ✅ refresh
+        }
+    );
+});
+
+
+
+
 </script>
 
 
