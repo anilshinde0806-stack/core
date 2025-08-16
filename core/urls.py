@@ -21,8 +21,8 @@ path('ajax/booking/form/', views.ajax_booking_form, name='ajax_booking_form'),
 path('bookings/', views.booking_list, name='booking_list'),
     path('ajax/login/', views.ajax_login, name='ajax_login'),
 path('product/<int:pk>/', views.product_detail, name='product_detail'),
-path('checkout/<int:pk>/', views.checkout, name='checkout'),
-path('checkout/', views.checkout_view, name='checkout'),
+
+
 path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
 path('api/cart1/', views.get_cart, name='get_cart'),
 path('api/cart/add/', views.add_to_cart, name='cart_add'),

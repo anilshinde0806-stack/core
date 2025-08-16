@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+{% load cart_extras %}
+
+ {% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Confirmation</title>
+    <script>
+        window.onload = function() {
+            {% if order.is_paid %}
+                alert("✅ Order Confirmed! Your Order ID is {{ order.id }}");
+            {% else %}
+                alert("⚠️ Order Pending Payment! Please complete payment.");
+            {% endif %}
+        };
+    </script>
+</head>
+<body>
+    <h1>Order Confirmation</h1>
+    <p>Thank you, {{ order.customer.full_name }}!</p>
+    <p>Order ID: {{ order.id }}</p>
+    <p>Total Price: ₹{{ order.total_price }}</p>
+
+    <h2>Items:</h2>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>₹{{ item.quantity|multiply:item.price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Pay Now Button if order is not paid -->
+    {% if not order.is_paid %}
+        <br>
+        <a href="{% url 'payment' order.id %}" style="padding: 10px 20px; background-color: #FF9800; color: white; text-decoration: none; border-radius: 5px;">
+            ߒ Pay Now
+        </a>
+    {% endif %}
+
+    <!-- Back to Shop Button -->
+    <br><br>
+    <a href="{% url 'clear_cart' %}" style="padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+        ← Back to Shop
+    </a>
+</body>
+</html>
