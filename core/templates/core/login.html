@@ -1,56 +1,21 @@
-{% extends 'core/base.html' %}
-{% block title %}Login - Unisex Salon{% endblock %}
+{% extends "core/base.html" %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<style>
-  body {
-    background: linear-gradient(to right, #f8e8f0, #fcefea);
-  }
-  .salon-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    padding: 30px;
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-  }
-  .salon-logo {
-    max-width: 100px;
-    margin-bottom: 15px;
-  }
-  .salon-card h4 {
-    font-family: 'Segoe UI', sans-serif;
-    font-weight: 600;
-    color: #d63384;
-  }
-  .form-control {
-    border-radius: 12px;
-  }
-  .btn-salon {
-    background-color: #d63384;
-    border: none;
-    border-radius: 12px;
-  }
-  .btn-salon:hover {
-    background-color: #c2186b;
-  }
-</style>
+<div class="row justify-content-center">
+  <div class="col-md-4">
+    <h2 class="text-center mb-4">Register</h2>
 
-<div class="d-flex justify-content-center align-items-center" style="height: 80vh;">
-  <div class="salon-card">
-    <img src="https://i.imgur.com/ItA8LWa.png" class="salon-logo" alt="Salon Logo">
-    <h4 class="mb-3">ߒ‍♀️ Welcome Back</h4>
-    <form method="POST">
+    <form method="post">
       {% csrf_token %}
-      {{ form.as_p }}
-      <div class="d-grid mt-3">
-        <button type="submit" class="btn btn-salon">Login</button>
-      </div>
+      {{ form|crispy }}
+
+      <button type="submit" class="btn btn-success w-100">Register</button>
     </form>
-    <div class="text-center mt-3">
-      <small>Don’t have an account? <a href="{% url 'register' %}" style="color:#d63384;">Register here</a></small>
-    </div>
+
+    <p class="text-center mt-3">
+      Already have an account? <a href="{% url 'login' %}">Login</a>
+    </p>
   </div>
 </div>
 {% endblock %}

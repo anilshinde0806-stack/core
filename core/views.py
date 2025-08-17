@@ -43,29 +43,24 @@ def home(request):
 
 # Register View
 def register_view(request):
-    print(request.POST)
-
-    if request.method == 'POST':
+    if request.method == 'POST':   # ✅ use uppercase
         form = UserCreationForm(request.POST)
-        print(request.POST)
-        print(form.errors)
-
         if form.is_valid():
             form.save()
-            print('form saved')
-            return redirect('login')  # Redirect to login after successful registration
+            return redirect('login')   # ✅ redirect after success
+        else:
+            # Invalid form → re-render with errors
+            return render(request, "core/register.html", {"form": form})
     else:
-
+        # GET request → show blank form
         form = UserCreationForm()
-
-    return render(request, 'core/register.html', {'form': form})
-
-# Login View
+        return render(request, "core/register.html", {"form": form})
+# Login View# Login View
 
 
 
 
-def login_view(request):
+def Loginview(request):
 
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)

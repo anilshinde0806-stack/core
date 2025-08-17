@@ -20,8 +20,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'rest_framework',
-   'corsheaders',
+    'corsheaders',
     'cart1',
+    "widget_tweaks",
+    "crispy_forms",
+    "crispy_bootstrap5",
 
 ]
 
@@ -139,7 +142,8 @@ EMAIL_HOST_USER = 'anilshinde0806@gmail.com'
 EMAIL_HOST_PASSWORD = 'wzlu vghv gvuj hvsj'  # not normal password
 SECURE_BROWSER_XSS_FILTER = True
 #SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 
 

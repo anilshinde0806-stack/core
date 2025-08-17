@@ -9,9 +9,26 @@
 <body style="text-align:center; background:#f0f0f0;">
 <audio id="toast-sound" src="{% static '/sound/notify.mp3' %}" preload="auto"></audio>
 
-
-
-      <div id="products-container" class="product-list"></div>`
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+  <div id="cart-toast" class="toast align-items-center text-white border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body">Toast message here</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
+<!-- Backdrop Overlay -->
+<div id="backdrop" class="backdrop"></div>
+      <div id="products-container"  style="display:none; margin-top:20px;" class="products-panel"></div>`
+<aside class="sidebar">
+  <div class="promo-banner">
+    <h3>ߎ Seasonal Sale!</h3>
+    <p>Get up to 40% off selected products</p>
+    <button id="shop-now-btn">Shop Now</button>
+    <canvas id="sparkle-canvas"></canvas>
+  </div>
+</aside>
 
 <section class="hero"><h2 class="animated-text">Your Style, Our Passion</h2></section>
 <!-- Success Message (initially hidden) -->
@@ -221,18 +238,20 @@ async function loadProducts() {
         const products = await response.json();
 
         let container = document.getElementById('products-container');
-        container.innerHTML = ''; // Clear old products
+        container.innerHTML = '<div class="product-grid">'; // Clear old products
 
         // Generate products list
         products.forEach(product => {
                                     container.innerHTML += `<ul><li>
-                                        <div class="product-card">
+                                        <div class="product">
                                         <img src="${product.image}" alt="${product.name}">
                                         <h3>${product.name}</h3>
                                         <p>₹${product.price}</p>
-                                       <button class="buy-btn" type="button" onclick="addToCart1(${product.id})" >Add to Cart</button>
+                                       <button class="buy-btn" type="button" onclick="addToCart1(${product.id},'${product.name}')" >Add to Cart</button>
                                        </div></li></ul>`
                                          });
+
+         container.innerHTML += '</div>'
     } catch (error) {
 
         alert('laod error'+error);
@@ -295,7 +314,7 @@ $(document).ready(function() {
 });
 
 
-async function addToCart1(product_id) {
+async function addToCart1(product_id,product_name) {
         //  e.preventDefault();
 
        // alert(product_id)
@@ -310,7 +329,7 @@ async function addToCart1(product_id) {
 
                     // showNotification("Add Cart","Selected Product added to cart ");
                      updateCartSummary(data);
-                     showToast("✅ " + data.items.name+ " added to cart!","success");
+                     showToast("✅ " + product_name + " added to cart!","success");
 
 
                     },
@@ -457,7 +476,7 @@ $(document).on("click", ".remove-from-cart", function() {
 
             //showNotification("Shopping Cart","Product removed from  Cart Successfully ");
              updateCartSummary(data);
-             showToast("❌ " + data.name + " removed from cart!", "danger");
+             showToast("❌ " + $(this).closest("tr").data("name") + " removed from cart!", "danger");
         }
     );
 });
@@ -472,7 +491,7 @@ $(document).on("click", ".update-cart", function() {
         //showNotification("Shopping Cart","Shopping Cart Update Successfully ");
             updateCartSummary(data);  // ✅ refresh
 
-             showToast("ߔ " + data.name + " updated!", "info");
+             showToast("ߔ " +  row.data("name") + " updated!", "info");
         }
     );
 });
@@ -530,45 +549,121 @@ if (sound) {
     toast.show();
 }
 
-$("#checkout-btn").on("click", function(e) {
-    e.preventDefault();
 
-    $.ajax({
-        url: "cart1/checkout/",
-        type: "POST",
-        headers: { "X-CSRFToken": csrftoken },
-        data: {
-            full_name: $("#full_name").val(),
-            email: $("#email").val(),
-            phone: $("#phone").val(),
-            address: $("#address").val()
-        },
-        success: function(response) {
-            if (response.success) {
+    $("#checkout-btn").on("click", function(e) {
+        e.preventDefault();
 
-                 showToast("Order placed! Order ID: " + response.order_id, "success");
-                 window.location.href = "cart1/payment/" + response.order_id + "/";
+        $.ajax({
+            url: "{% url 'checkout' %}",   // ✅ Django-safe URL
+            type: "POST",
+            headers: { "X-CSRFToken": csrftoken },
+            data: {
+                full_name: $("#full_name").val(),
+                email: $("#email").val(),
+                phone: $("#phone").val(),
+                address: $("#address").val()
+            },
+            success: function(response) {
+                if (response.success) {
+                   showToast("Payment successful! Payment ID: " + response.order_id, "success");
+                   window.location.href = "cart1/payment/" + response.order_id + "/";
+
+                }
+            },
+            error: function(xhr) {
+                alert("❌ Checkout failed: " + xhr.responseJSON?.error || "Unknown error");
             }
-        },
-        error: function(xhr) {
-            alert("Checkout failed: " + xhr.responseJSON.error);
-        }
+        });
     });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.getElementById("shop-now-btn").addEventListener("click", function () {
+
+  });
+
+  // Optional: close when clicking overlay
+  const shopBtn = document.getElementById("shop-now-btn");
+  const products = document.getElementById("products-container");
+  const canvas = document.getElementById("sparkle-canvas");
+  const backdrop = document.getElementById("backdrop");
+  // ✅ Show products on button click
+  if (shopBtn && products) {
+    shopBtn.addEventListener("click", function () {
+      backdrop.classList.add("active");
+
+     products.classList.add("active");// document.getElementById("products").classList.add("active");
+
+      products.style.display = "flex";
+      products.scrollIntoView({ behavior: "smooth" });
+        // Add "show" class for animation
+    products.style.display = "block"; // make visible first
+    setTimeout(() => {
+        products.classList.add("show");
+    }, 50);
+
+    // Smooth scroll to products
+    window.scrollTo({
+   //     top: products.offsetTop - 50,
+        behavior: "smooth"
+    });
+
+    });
+  }
+backdrop.addEventListener("click", function() {
+  products.classList.remove("active");
+  backdrop.classList.remove("active");
+  });
+  // ✅ Sparkle animation (only if canvas exists)
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // sparkle particles
+    const sparkles = [];
+    function createSparkle() {
+      sparkles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 3 + 1,
+        alpha: 1,
+        decay: Math.random() * 0.02 + 0.01
+      });
+    }
+
+    function drawSparkles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < sparkles.length; i++) {
+        const s = sparkles[i];
+        ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fill();
+        s.alpha -= s.decay;
+        if (s.alpha <= 0) {
+          sparkles.splice(i, 1);
+          i--;
+        }
+      }
+    }
+
+    function animate() {
+      createSparkle();
+      drawSparkles();
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }
 });
 
 </script>
-
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
-  <div id="cart-toast" class="toast align-items-center text-white border-0" role="alert">
-    <div class="d-flex">
-      <div class="toast-body">Toast message here</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-    </div>
-  </div>
-</div>
-<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
-
-
 </body>
 
 {% endblock %}

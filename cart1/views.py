@@ -120,18 +120,29 @@ def clear_cart_and_redirect(request):
     # Redirect to shop/products page
     return redirect('home')  # replace with your actual shop URL
 def payment(request, order_id):
-    order = get_object_or_404(Order, id=order_id, customer__user=request.user)
+    order = get_object_or_404(Order, id=order_id)
 
     if request.method == "POST":
-        # Mark order as paid (replace with actual payment gateway logic)
+        if order.is_paid:
+            return JsonResponse({
+                "success": True,
+                "payment_id": order.payment_id,
+                "amount": float(order.total_price),
+            })
+
+        # ⚡ Simulate payment success
+        payment_id = f"PAY{order.id}12345"
+        amount = order.total_price
+
+        order.payment_id = payment_id
         order.is_paid = True
-        order.payment_id = "DEMO-PAYMENT-1234"
         order.save()
 
-        subtotal = 0
-        for item in order.items.all():
-           subtotal += item.quantity * item.price
-        # Return JSON for AJAX
-        return JsonResponse({"success": True, "order_id": order.id,"payment_id":order.payment_id,"subtotal":subtotal})
+        return JsonResponse({
+            "success": True,
+            "payment_id": payment_id,
+            "amount": float(amount),
+        })
 
+    # If GET → render payment page
     return render(request, "payment.html", {"order": order})

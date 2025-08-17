@@ -1,81 +1,20 @@
-{% extends 'core/base.html' %}
-{% block title %}Register - Unisex Salon{% endblock %}
+{% extends "core/base.html" %}
 
 {% block content %}
-<style>
-  body {
-    background: linear-gradient(to right, #fff0f5, #fde9f4);
-  }
-  .salon-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    padding: 30px;
-    max-width: 450px;
-    width: 100%;
-    text-align: center;
-  }
-  .salon-logo {
-    max-width: 100px;
-    margin-bottom: 15px;
-  }
-  .salon-card h4 {
-    font-family: 'Segoe UI', sans-serif;
-    font-weight: 600;
-    color: #a94472;
-  }
-  .form-control {
-    border-radius: 12px;
-  }
-  .btn-register {
-    background-color: #a94472;
-    border: none;
-    border-radius: 12px;
-  }
-  .btn-register:hover {
-    background-color: #902b5e;
-  }
-</style>
-<h2>Register</h2>
+<div class="row justify-content-center">
+  <div class="col-md-4">
+    <h2 class="text-center mb-4">Register</h2>
 
-<div class="d-flex justify-content-center align-items-center" style="height: 90vh;">
-  <div class="salon-card">
-    <img src="https://i.imgur.com/ItA8LWa.png" class="salon-logo" alt="Salon Logo">
-    <h4 class="mb-3">ߒ Create Your Account</h4>
-      <h2>Register</h2>
-<form method="post">
-  {% csrf_token %}
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
 
-  {% if form.errors %}
-    <div class="error-messages" style="color: red;">
-      <ul>
-        {% for field in form %}
-          {% for error in field.errors %}
-            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-        {% for error in form.non_field_errors %}
-          <li>{{ error }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-  {% endif %}
+      <button type="submit" class="btn btn-success w-100">Register</button>
+    </form>
 
-  <!-- Render fields -->
-  {% for field in form %}
-    <div>
-      {{ field.label_tag }}<br>
-      {{ field }}
-    </div>
-  {% endfor %}
-
-  <button type="submit">Register</button>
-</form>
-
-
-    <div class="text-center mt-3">
-      <small>Already have an account? <a href="{% url 'login' %}" style="color:#a94472;">Login here</a></small>
-    </div>
+    <p class="text-center mt-3">
+      Already have an account? <a href="{% url 'login' %}">Login</a>
+    </p>
   </div>
 </div>
 {% endblock %}
