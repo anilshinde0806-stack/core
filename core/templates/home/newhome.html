@@ -1,470 +1,142 @@
 {% extends 'core/base.html' %}
 {% block content %}
  {% load static %}
-<style xmlns="http://www.w3.org/1999/html"></style>
-    <meta charset="UTF-8">
-    <title>Indian Flag</title>
-    <!-- Load PyScript -->
+<head>
+    <title>Payment & Order Confirmation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
 
-<body style="text-align:center; background:#f0f0f0;">
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: #a35555;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
 
+        h1, h2, h3 {
+            color: #333;
+        }
 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
 
-      <div id="products-container" class="product-list"></div>`
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
 
-<section class="hero"><h2 class="animated-text">Your Style, Our Passion</h2></section>
-<!-- Success Message (initially hidden) -->
-<div id="booking-response" class="alert alert-success text-center" style="display:none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1055;">
-    Booking successful!</div>
-<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-             <h5 class="modal-title">Book Appointment</h5>
-             <button type="button" class="btn-close flash-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        table th {
+            background: #f0f0f0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-pay {
+            background-color: #FF9800;
+        }
+
+        .btn-back {
+            background-color: #4CAF50;
+        }
+
+        #confirmation {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            background-color: #e8f5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div id="payment-section" >
+            <h1>Payment for Order #{{ order.id }}</h1>
+            <p>Total Amount: <strong>₹{{ order.total_price }}</strong></p>
+
+            <form id="payment-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-pay">ߒ Pay Now</button>
+            </form>
         </div>
-              <div class="modal-body" id="modalFormContainer">
-                <!-- Form gets loaded here -->
-              </div>
+
+        <div id="confirmation">
+            <h2>✅ Order Confirmed!</h2>
+            <p>Thank you, <strong>{{ order.customer.full_name }}</strong>!</p>
+            <p>Order ID: <strong>{{ order.id }}</strong></p>
+            <p>Payment ID: <strong>{{ order.payment_id}}</strong></p>
+            <p>Total Paid: <strong>₹{{ order.total_price }}</strong></p>
+
+            <h3>Items:</h3>
+            <table>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                </tr>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.price }}</td>
+                    <td>₹{{ item.subtotal}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <a href="{% url 'clear_cart' %}" class="btn btn-back">← Back to Shop</a>
+        </div>
+
     </div>
-  </div>
-</div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $("#payment-form").on("submit", function(e) {
+            e.preventDefault(); // prevent page reload
 
-<section class="services">
-    <h3>Our Services</h3>
-    <div class="service-grid">
-        <div class="service">
-            <i class="fa-solid fa-person"></i>
-            <h4>Haircuts</h4>
-            <p>Trendy styles for men & women</p>
-        </div>
-        <div class="service">
-            <i class="fa-solid fa-spa"></i>
-            <h4>Spa & Relaxation</h4>
-            <p>Facials, massages, and more</p>
-        </div>
-        <div class="service">
-            <i class="fa-solid fa-bahai"></i>
-            <h4>Hair Coloring</h4>
-            <p>Vibrant, bold or natural tones</p>
-        </div>
-        <div class="service">
-            <i class="fa-solid fa-hand-sparkles"></i>
-            <h4>Manicure & Pedicure</h4>
-            <p>Clean, care & polish your nails</p>
-        </div>
-    </div>
-</section>
-
-<style>
-</style>
-{% if user.is_authenticated and not user.is_staff %}
-  <!-- Booking form for normal logged-in users -->
-  <section id="mini-booking">
-    <h3>Quick Booking</h3>
-    <form id="booking-form" method="post" action="">
-      {% csrf_token %}
-      <input type="text" name="service" placeholder="Service" required>
-      <input type="date" name="date" required>
-      <input type="time" name="time" required>
-      <button type="submit">Book</button>
-    </form>
-    <div id="booking-response"></div>
-  </section>
-{% else %}
-  {% if not user.is_authenticated %}
-    <p><a href="{% url 'login' %}">Log in</a> to book an appointment.</p>
-  {% endif %}
-{% endif %}
-<section id="booking-section">
-<section class="cta">
-    <h3>Ready for a new look?</h3>
-    <p>Book an appointment with our expert stylists today.</p>
-    <button id="loadBookingForm" class="cta-btn">Book Now</button>
-</section>
-</section>
-<section class="testimonials">
-    <h2>What Our Clients Say</h2>
-    <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <p>"Amazing service! The best haircut I’ve had in years."</p>
-                <strong>- Priya K.</strong>
-            </div>
-            <div class="carousel-item">
-                <p>"Super clean and friendly staff. Highly recommended!"</p>
-                <strong>- Rahul S.</strong>
-            </div>
-            <div class="carousel-item">
-                <p>"I love the spa and the relaxation treatments. Highly recommend!"</p>
-                <strong>- Neha T.</strong>
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-</section>
-<section class="gallery">
-    <h2>Salon Gallery</h2>
-    <div class="gallery-grid">
-        <div class="gallery-item">
-            <img src="{% static 'images/gallery1.jpeg' %}" alt="Gallery 1" class="img-fluid">
-            <div class="gallery-caption">Hair Styling</div>
-        </div>
-        <div class="gallery-item">
-            <img src="{% static 'images/gallery2.jpeg' %}" alt="Gallery 2" class="img-fluid">
-            <div class="gallery-caption">Relaxation Spa</div>
-        </div>
-        <div class="gallery-item">
-            <img src="{% static 'images/gallery3.jpeg' %}" alt="Gallery 3" class="img-fluid">
-            <div class="gallery-caption">Hair Coloring</div>
-        </div>
-    </div>
-</section>
-<!-- Cart Modal -->
-<!-- Cart Modal -->
-<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title" id="cartModalLabel">ߛ My Cart</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body">
-        <table id="cart-table" class="table table-bordered text-center">
-          <thead class="table-light">
-            <tr>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Subtotal</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Cart items injected here -->
-          </tbody>
-        </table>
-
-        <div id="cart-summary" class="mt-3 text-end">
-          <p><b>Total Items:</b> <span id="cart-qty">0</span></p>
-          <p><b>Total Price:</b> ₹<span id="cart-price">0.00</span></p>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
-        <a href="/checkout/" class="btn btn-primary">Checkout</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<div id="booking-response" class="alert alert-success flash-message" style="display:none;">Booking confirmed!</div>
-<!-- THEN put your script here -->
-<script>
-$(document).ready(function () {
- $('#loadBookingForm').click(function () {
-          $.ajax({
-
-                    url: '/ajax/booking/form/',  // URL for ajax_booking_form view
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-
-
-                        $('#modalFormContainer').html(data.form_html); // inject form HTML
-                        const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'), {
-                            backdrop: 'static',
-                            keyboard: false
-                        });
-                        bookingModal.show();
-                    },
-                    error: function () {
-                        alert('Failed to load booking form.');
+            $.ajax({
+                url: "{% url 'payment' order.id %}",
+                type: "POST",
+                headers: { "X-CSRFToken": getCookie("csrftoken") },
+                data: {},
+                success: function(response) {
+                    if(response.success){
+                        $("#payment-section").hide();
+                        $("#confirmation").show();
+                        window.scrollTo(0,0);
                     }
-
-                // end ajax
-                });
+                },
+                error: function(xhr) {
+                    alert("❌ Payment failed. Please try again.");
+                }
             });
-// end doc redy
-});
-
-</script>
-<script>
-
-// Function to get CSRF token from cookies
-async function loadProducts() {
-    try {
-
-        //alert("in loadproducts")
-        const response = await fetch('/api/products/');
-        const products = await response.json();
-
-        let container = document.getElementById('products-container');
-        container.innerHTML = ''; // Clear old products
-
-        // Generate products list
-        products.forEach(product => {
-                                    container.innerHTML += `<ul><li>
-                                        <div class="product-card">
-                                        <img src="${product.image}" alt="${product.name}">
-                                        <h3>${product.name}</h3>
-                                        <p>₹${product.price}</p>
-                                       <button class="buy-btn" type="button" onclick="addToCart1(${product.id})" >Add to Cart</button>
-                                       </div></li></ul>`
-                                         });
-    } catch (error) {
-
-        alert('laod error'+error);
-        console.log('Error loading products:', error);
-    }
-}
-document.addEventListener('DOMContentLoaded', loadProducts);
-</script>
-<script>
-$(document).ready(function() {
-
-    $(document).on('submit', '#bookingForm', function (e) {
-        e.preventDefault();
-
-        // Remove old AJAX error messages
-        $(".ajax-error").remove();
-
-        let formData = $(this).serialize();
-
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: formData,
-            success: function (response) {
-                if (response.status === "login_required") {
-                    $('#bookingModal').modal('hide');
-                    $('#loginModal').modal('show');
-                }
-                else if (response.status === "success") {
-                    $('#bookingModal').modal('hide');
-                    $('#booking-response')
-                        .fadeIn()
-                        .delay(3000)
-                        .fadeOut();
-                }
-                else if (response.status === "error") {
-                    // Loop through Django form errors and inject after the relevant <p>
-                    for (let field in response.errors) {
-                        let errorText = response.errors[field].join(", ");
-                        let fieldElement = $(`#bookingForm [name="${field}"]`);
-                        fieldElement.closest('p').append(
-                            `<span class="ajax-error" style="color:red;display:block;font-size:0.9em;">${errorText}</span>`
-                        );
-                    }
-
-                    // Handle non-field errors
-                    if (response.errors.__all__) {
-                        let nonFieldErrors = response.errors.__all__.join(", ");
-                        $('#bookingForm').prepend(
-                            `<div class="ajax-error" style="color:red;margin-bottom:10px;">${nonFieldErrors}</div>`
-                        );
-                    }
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("AJAX Error:", status, error);
-            }
         });
-    });
-});
-
-
-async function addToCart1(product_id) {
-        //  e.preventDefault();
-
-       // alert(product_id)
-          $.ajax({
-
-                    type: 'POST',
-                    url: '{% url 'cart_add' %}',
-                    data:{product_id: product_id,csrfmiddlewaretoken: getCSRFToken(),action:'post'},
-                    success: function(json) {
-                     $("#cart-price").text("₹" +json.total_price);
-                     $("#cart-count").text(json.total_quantity);
-                     updateCartSummary(json);
-
-
-
-                    },
-
-                    error: function (xhr, status, error) {
-                      alert("Cart not added")                   }
-                });
-                // end ajax
-
-}
-
-// Remove item with fade-out effect
-document.addEventListener("click", async (event) => {
-    if (event.target.classList.contains("remove-item")) {
-        const productId = event.target.dataset.id;
-
-        alert(productId)
-        const cartItem = document.getElementById(`cart-item-${productId}`);
-
-        const res = await fetch(`/api/cart/remove/${productId}/`, {method: "POST"});
-
-        if (res.ok) {
-            // Fade out animation before removing from DOM
-            cartItem.style.transition = "opacity 0.3s ease";
-            cartItem.style.opacity = "0";
-            setTimeout(async () => {
-                cartItem.remove();
-                //await refreshCartModal(); // Reload cart after animation
-            }, 300);
-        }
-    }
-});
-
-
-// Load cart when modal opens
-//document.getElementById('cartModalBtn').addEventListener('click', loadCartDetails);
-
-$(document).ready(function() {
-
-  $("#loginForm").submit(function(e) {
-    e.preventDefault();
-
-    $.ajax({
-        url: "/ajax/login/",
-        type: "POST",
-        data: $(this).serialize(),
-        success: function(response) {
-            if (response.status === "success") {
-                $("#loginModal").modal("hide");
-                showNotification("success", "✅ Login successful! Please try booking again.");
-                window.location.reload();
-            } else {
-                showNotification("error", "❌ " + response.message);
-            }
-        }
-    });
-    });
-
-
-        //end of doc redy
-
-    });
-   function showNotification(type, text) {
-    const container = document.getElementById("notification-container");
-
-    // Create notification div
-    const notif = document.createElement("div");
-    notif.className = `notification notification-${type}`;
-    notif.innerHTML = text;
-
-    container.appendChild(notif);
-
-    // Auto-remove after 3 seconds with fade animation
-    setTimeout(() => {
-        notif.style.animation = "fadeOut 0.9s forwards";
-        setTimeout(() => notif.remove(), 500);
-    }, 8000);
-}
-
-
-// Load cart data when modal is opened
-document.getElementById("cartModal").addEventListener("show.bs.modal", async () => {
-    //await refreshCartModal();
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', loadProducts);
-function updateCartSummary(data) {
-    // ✅ Update modal totals
-
-    $("#cart-price").text("₹" +data.total_price);
-
-    // ✅ Update navbar count
-    $("#cart-count").text(data.total_quantity);
-
-    // ✅ Rebuild modal table
-    let tbody = $("#cart-table tbody");
-     tbody.empty();
-     //alert(data.items.length)
-    if (data.items.length === 0) {
-        tbody.append("<tr><td colspan='5'>ߛ Cart is empty</td></tr>");
-        return;
-    }
-
-    data.items.forEach(item => {
-        let row = `
-            <tr data-id="${item.id}">
-                <td>${item.name}</td>
-                <td>₹${item.price}</td>
-                <td>
-                    <input type="number" class="update-qty form-control d-inline"
-                           value="${item.quantity}" min="1" style="width:70px">
-                </td>
-                <td>₹${item.subtotal}</td>
-                <td>
-                    <button class="btn btn-sm btn-success update-cart">Update</button>
-                    <button class="btn btn-sm btn-danger remove-from-cart">Remove</button>
-                </td>
-            </tr>
-        `;
-        tbody.append(row);
-    });
-}
-$('#cartModal').on('show.bs.modal', function () {
-
-    alert("cart loaded")
-    $.get("/cart1/detail/", function (data) {
-        updateCartSummary(data);
-    });
-});
-
-$(document).ready(function () {
-    $.get("/cart1/detail/", function (data) {
-        updateCartSummary(data);
-    });
-});
-
-$(document).on("click", ".remove-from-cart", function() {
-    let productId = $(this).closest("tr").data("id");
-//alert(productId);
-    $.post("/cart1/remove/", { product_id: productId, csrfmiddlewaretoken: csrftoken ,action:'post'},
-        function(data) {
-            updateCartSummary(data);  // ✅ refresh
-        }
-    );
-});
-$(document).on("click", ".update-cart", function() {
-    let row = $(this).closest("tr");
-    let productId = row.data("id");
-    let qty = row.find(".update-qty").val();
-
-    $.post("/cart1/update/", { product_id: productId, quantity: qty, csrfmiddlewaretoken: csrftoken,action:'post' },
-        function(data) {
-            updateCartSummary(data);  // ✅ refresh
-        }
-    );
-});
-
-
-
-
-</script>
-
-
+    </script>
 </body>
-
+</html>
 {% endblock %}
+</html>
