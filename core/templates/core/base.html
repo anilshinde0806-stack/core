@@ -91,7 +91,7 @@ function getCookie(name) {
         }</style>
 </head>
 <body>
-<audio id="toast-sound" src="{% static 'sounds/notify.mp3' %}" preload="auto"></audio>
+
 
 <main class="bg-black h-screen grid place-items-center text-white">
   <article class="overflow-hidden p-px relative rounded-md bg-neutral-600">
@@ -133,6 +133,8 @@ function getCookie(name) {
 
 
         {% if user.is_authenticated %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">My Dashboard</a></li>
+           <li class="nav-item"><a class="nav-link" href="{% url 'update_profile' %}">Edit Profile</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Welcome, {{ user.username }}</a></li>
           <li class="nav-item"><form method="POST" action="{% url 'logout' %}" style="display:inline;">
     {% csrf_token %}
@@ -145,10 +147,10 @@ function getCookie(name) {
 </li>
         {% else %}
           <li class="nav-item"><a class="nav-link" href="{% url 'login' %}" >LoginNew</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li> </ul>
         {% endif %}
 
-          <li class="nav-item"><span class="badge-new">
+          <span class="badge-new">
               items - <span id="cart-price">₹0</span>
 
                         <button id="cart-btn" type="button"
@@ -163,8 +165,8 @@ function getCookie(name) {
 </button>
 
 
-</span></li>
-      </ul>
+</span>
+
     </div>
   </div>
 </nav>

@@ -4,7 +4,6 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt  # only if needed
-from pipenv.core import console
 from django.views.decorators.http import require_GET
 from .forms import BookingForm
 from .models import Booking
@@ -41,7 +40,6 @@ def home(request):
    return render(request, 'home/newhome.html', {'products': products})
 
 
-# Register View
 def register_view(request):
     if request.method == 'POST':   # ✅ use uppercase
         form = UserCreationForm(request.POST)
@@ -55,12 +53,11 @@ def register_view(request):
         # GET request → show blank form
         form = UserCreationForm()
         return render(request, "core/register.html", {"form": form})
-# Login View# Login View
 
 
 
 
-def Loginview(request):
+def LoginView(request):
 
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)

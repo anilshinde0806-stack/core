@@ -37,3 +37,27 @@ class BookingForm(forms.ModelForm):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.fields['service'].queryset = Service.objects.all()
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    phone = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={'class':'form-control'}))
+    address = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control', 'rows':3}), required=False)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'phone', 'address']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and hasattr(self.instance, 'profile'):
+            self.fields['phone'].initial = self.instance.profile.phone
+            self.fields['address'].initial = self.instance.profile.address
+
+    def save(self, commit=True):
+        user = super().save(commit)
+        profile = user.profile
+        profile.phone = self.cleaned_data['phone']
+        profile.address = self.cleaned_data['address']
+        if commit:
+            profile.save()
+        return user

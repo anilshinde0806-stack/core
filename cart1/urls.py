@@ -13,6 +13,11 @@ path('checkout/', views.checkout, name='checkout'),
 path("orders/<int:order_id>/", views.order_confirmation, name="order_confirmation"),
     path("clear-cart/", views.clear_cart_and_redirect, name="clear_cart"),
     path("payment/<int:order_id>/", views.payment, name="payment"),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+path('dashboard/order/<int:order_id>/', views.order_detail_view, name='order_detail'),
+    path('dashboard/profile/update/', views.update_profile_view, name='update_profile'),
+path('guest_checkout/', views.guest_checkout, name='guest_checkout'),
+
 ]
 
 
